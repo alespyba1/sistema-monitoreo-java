@@ -4,6 +4,53 @@
     | Estudiante B | Ricardo René Reséndiz Nieves | rresendiz42-scar  | Jueves 9 de septiembre de 2026 |
 
 ---
+## 1. Descripción del problema
+
+### Qué sistema se pretende representar
+
+Se busca representar, en forma de programa, una instalación industrial que cuenta con varios tanques de almacenamiento de líquido. Cada tanque funciona de manera independiente: tiene su propia capacidad, su propio contenido y su propia condición de operación en un momento dado. Además, cada tanque cuenta con un sensor que permite conocer cuánto líquido contiene sin necesidad de inspeccionarlo directamente.
+
+El programa no controla equipo físico real. Es una simulación de consola cuyo propósito es reproducir el comportamiento lógico del proceso: que un tanque se llene, se vacíe, se detenga y pueda ser consultado, respetando en todo momento los límites físicos que tendría un tanque real.
+
+### Qué información necesita manejar
+
+Para que la simulación tenga sentido, el sistema debe conservar:
+
+
+**Identificación de cada tanque**, ya que la instalación tiene varios y deben poder distinguirse entre sí (T-01, T-02, T-03).
+
+**Capacidad máxima**, expresada en litros. Es un dato fijo que corresponde a la construcción física del tanque y no debería cambiar durante la operación.
+
+**Nivel actual**, también en litros. Es el dato que varía continuamente conforme el tanque se llena o se vacía.
+
+**Estado de operación**, que indica qué está haciendo el tanque en este momento: `DETENIDO`, `LLENANDO` o `VACIANDO`.
+
+**Identificación del sensor** asociado y el valor de su última lectura, para poder rastrear de dónde proviene la medición.
+
+Sobre estos datos asumimos lo siguiente: la capacidad y el nivel se manejan en litros como valores numéricos que admiten decimales, ya que una lectura de sensor rara vez arroja un valor entero exacto. El identificador del tanque y el del sensor son cadenas de texto, porque siguen un formato como T-01 o SN-01 que combina letras y números. El estado de operación, aunque se escribe como texto, solo puede tomar uno de los tres valores previstos.
+
+### Qué operaciones debe realizar
+
+El sistema debe permitir dos tipos de acciones. Por un lado, **acciones que modifican** la condición del tanque: agregar líquido, retirar líquido y detener la operación. Por otro lado, **consultas que no modifican nada**: conocer el nivel actual, conocer el porcentaje de ocupación respecto a la capacidad, conocer el estado de operación y mostrar el resumen completo de la información del tanque.
+
+Adicionalmente, el sensor debe poder realizar una lectura del tanque que vigila, entregar el valor medido y señalar si esa lectura resulta coherente, es decir, si cae dentro del intervalo que físicamente tiene sentido para ese tanque.
+
+Conviene señalar que estas operaciones se aplican a cada tanque de manera individual. El sistema trabaja con varios tanques al mismo tiempo, y una orden de llenado dirigida a T-01 no debe alterar en absoluto la condición de T-02 ni de T-03.
+
+### Qué restricciones deben respetarse
+
+La restricción central es que el contenido del tanque siempre debe cumplir:
+
+```text
+0 <= nivelActual <= capacidadMaxima
+```
+
+Esto tiene una justificación física evidente: un tanque no puede contener litros negativos, ni puede almacenar más líquido del que cabe en él. Decidimos que, ante una operación que rompería el límite, el tanque no rechace la orden por completo sino que la ejecute hasta donde le sea posible. Es decir, si a un tanque de 1000 L con 900 L se le solicitan 300 L más, se llenará hasta 1000 L y descartará el excedente; y si a un tanque con 200 L se le pide vaciar 500 L, quedará en 0 L en lugar de un valor negativo. Nos pareció el comportamiento más cercano al de un tanque real, donde el líquido sobrante simplemente se derrama o la bomba se queda sin succión.
+
+De esta restricción se desprende una consecuencia importante para el diseño: el nivel no puede ser un dato que cualquier parte del programa modifique libremente. Si desde `Main` fuera posible asignar directamente un valor al nivel, la restricción podría violarse sin que nada lo impidiera. Por eso el propio tanque debe ser el responsable de vigilar sus límites, y toda modificación debe pasar por sus métodos.
+
+Además, el estado de operación debe corresponder a lo que realmente ocurrió: no tiene sentido que un tanque quede marcado como `LLENANDO` después de que se le solicitó detenerse.
+
 
 ## 2. Identificación de objetos
 
