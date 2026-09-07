@@ -3,43 +3,46 @@
     | Estudiante A | Alejandro Spindola           | alespyba1         | Jueves 9 de septiembre de 2026 |
     | Estudiante B | Ricardo René Reséndiz Nieves | rresendiz42-scar  | Jueves 9 de septiembre de 2026 |
 
-## 1. Descripción del problema
+---
 
-### Qué sistema se pretende representar
+## 2. Identificación de objetos
 
-Se busca representar, en forma de programa, una instalación industrial que cuenta con varios tanques de almacenamiento de líquido. Cada tanque funciona de manera independiente: tiene su propia capacidad, su propio contenido y su propia condición de operación en un momento dado. Además, cada tanque cuenta con un sensor que permite conocer cuánto líquido contiene sin necesidad de inspeccionarlo directamente.
+De la descripción del problema se desprenden dos elementos con identidad propia, y un tercer componente que cumple una función distinta dentro del programa.
 
-El programa no controla equipo físico real. Es una simulación de consola cuyo propósito es reproducir el comportamiento lógico del proceso: que un tanque se llene, se vacíe, se detenga y pueda ser consultado, respetando en todo momento los límites físicos que tendría un tanque real.
+### 2.1 Tanque
 
-### Qué información necesita manejar
+**Qué representa.** Un tanque físico de almacenamiento de la instalación, con su capacidad, su contenido y su condición de operación.
 
-Para que la simulación tenga sentido, el sistema debe conservar:
+**Por qué debe existir como objeto.** Porque la instalación tiene varios tanques y cada uno mantiene sus propios datos de forma simultánea e independiente: T-01 puede estar llenándose con 800 L mientras T-02 está detenido con 120 L. Si se intentara resolver el problema con variables sueltas, se necesitarían tres variables por cada tanque y no habría manera de mantenerlas asociadas entre sí. Una clase permite que cada tanque exista como una unidad completa, con su información y su comportamiento juntos, y que crear un tanque más sea simplemente crear otro objeto.
 
-- **Identificación de cada tanque**, ya que la instalación tiene varios y deben poder distinguirse entre sí (T-01, T-02, T-03).
-- **Capacidad máxima**, expresada en litros. Es un dato fijo que corresponde a la construcción física del tanque y no debería cambiar durante la operación.
-- **Nivel actual**, también en litros. Es el dato que varía continuamente conforme el tanque se llena o se vacía.
-- **Estado de operación**, que indica qué está haciendo el tanque en este momento: `DETENIDO`, `LLENANDO` o `VACIANDO`.
-- **Identificación del sensor** asociado y el valor de su última lectura, para poder rastrear de dónde proviene la medición.
+**Qué responsabilidad tendría.** El tanque es el responsable de conservar y proteger su propia información. Debe permitir que se le agregue o retire líquido, pero garantizando siempre que su contenido permanezca entre cero y su capacidad máxima. También debe informar su nivel, su porcentaje de ocupación y su estado cuando se le consulte, y actualizar ese estado de acuerdo con la operación que se le solicitó.
 
-### Qué operaciones debe realizar
+### 2.2 SensorNivel
 
-El sistema debe permitir dos tipos de acciones. Por un lado, **acciones que modifican** la condición del tanque: agregar líquido, retirar líquido y detener la operación. Por otro lado, **consultas que no modifican nada**: conocer el nivel actual, conocer el porcentaje de ocupación respecto a la capacidad, conocer el estado de operación y mostrar el resumen completo de la información del tanque.
+**Qué representa.** El dispositivo de medición instalado en un tanque, que permite conocer su nivel sin acceder directamente al equipo.
 
-Adicionalmente, el sensor debe poder realizar una lectura del tanque que vigila, entregar el valor medido y señalar si esa lectura resulta coherente, es decir, si cae dentro del intervalo que físicamente tiene sentido para ese tanque.
+**Por qué debe existir como objeto.** Aunque podría parecer suficiente con preguntarle el nivel al tanque, en un sistema automatizado real el sensor es un elemento distinto e identificable: tiene su propia etiqueta (SN-01), puede fallar, puede entregar lecturas fuera de rango y es el punto por donde la información del proceso llega al sistema de monitoreo. Representarlo como objeto refleja esa separación entre *el proceso* y *el medio por el cual se observa el proceso*, que es una distinción fundamental en automatización.
 
-### Qué restricciones deben respetarse
+**Qué responsabilidad tendría.** El sensor es responsable de obtener una lectura del tanque que vigila, conservar el valor de esa última medición y poder informarlo. Además debe indicar si la lectura obtenida es válida, es decir, si se encuentra dentro del intervalo aceptable para ese tanque.
 
-La restricción central es que el contenido del tanque siempre debe cumplir:
+Es importante señalar lo que el sensor **no** debe hacer: no almacena el nivel real del tanque ni lo modifica. El nivel verdadero pertenece al tanque; el sensor únicamente guarda una copia del último valor que observó.
 
-```text
-0 <= nivelActual <= capacidadMaxima
-```
+### 2.3 El estado de operación: por qué no lo tratamos como objeto
 
-Esto tiene una justificación física evidente: un tanque no puede contener litros negativos, ni puede almacenar más líquido del que cabe en él. Por lo tanto, si se solicita un llenado que excedería la capacidad, el tanque debe llenarse únicamente hasta su tope; y si se solicita un vaciado mayor al contenido disponible, el tanque debe quedar en cero, no en un valor negativo.
+Consideramos si `DETENIDO`, `LLENANDO` y `VACIANDO` debían formar un objeto aparte. Concluimos que no, porque el estado no tiene información propia ni comportamiento propio: es únicamente un dato que describe al tanque en un instante determinado, del mismo modo que el nivel. Por lo tanto lo trataremos como un atributo del tanque, con valores restringidos a esas tres opciones.
 
-De esta restricción se desprende una consecuencia importante para el diseño: el nivel no puede ser un dato que cualquier parte del programa modifique libremente. Si desde `Main` fuera posible asignar directamente un valor al nivel, la restricción podría violarse sin que nada lo impidiera. Por eso el propio tanque debe ser el responsable de vigilar sus límites, y toda modificación debe pasar por sus métodos.
+### 2.4 El programa de monitoreo
 
-Además, el estado de operación debe corresponder a lo que realmente ocurrió: no tiene sentido que un tanque quede marcado como `LLENANDO` después de que se le solicitó detenerse.
+Finalmente, se requiere un componente que cree los tanques y sus sensores, ejecute la secuencia de operaciones y muestre los resultados en consola. No representa un elemento físico del proceso, sino el punto de arranque del programa y el encargado de la presentación de la información. Por esa razón no lo consideramos un objeto del dominio del problema, sino la clase principal (`Main`) desde la cual se utilizan los objetos anteriores.
+
+### 2.5 Resumen de objetos identificados
+
+Quedan entonces dos objetos del dominio, `Tanque` y `SensorNivel`, cuyas responsabilidades concretas, información a conservar y comportamientos se detallan en la sección 3, y cuya colaboración se analiza en la sección 4.
 
 ---
 
+## 3. Estado y comportamiento
+
+---
+
+## 4. Relaciones entre los objetos
