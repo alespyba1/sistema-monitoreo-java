@@ -2,6 +2,10 @@
 skinparam classAttributeIconSize 0
 
 class Tanque {
+  + {static} DETENIDO : String
+  + {static} LLENANDO : String
+  + {static} VACIANDO : String
+  --
   - id : String
   - capacidadMaxima : double
   - nivelActual : double
