@@ -93,3 +93,60 @@ Quedan entonces dos objetos del dominio, `Tanque` y `SensorNivel`, cuyas respons
 ---
 
 ## 4. Relaciones entre los objetos
+
+
+
+
+
+
+
+
+
+---
+
+## 5. Diseño de clases
+
+A partir de los objetos identificados en la sección 2 y de las responsabilidades de la sección 3, proponemos las siguientes clases.
+
+| Clase | Atributos propuestos | Tipo de dato | Métodos propuestos | Responsabilidad |
+| --- | --- | --- | --- | --- |
+| `Tanque` | `id` | `String` | `Tanque(String, double, double)` | Representar un tanque de almacenamiento, conservar su información y garantizar que su nivel permanezca siempre entre cero y su capacidad máxima. |
+| | `capacidadMaxima` | `double` | `getId()`, `getCapacidadMaxima()`, `getNivelActual()`, `getEstado()` | |
+| | `nivelActual` | `double` | `llenar(double)`, `vaciar(double)`, `detener()` | |
+| | `estado` | `String` | `obtenerPorcentajeLlenado()`, `mostrarInformacion()` | |
+| `SensorNivel` | `id` | `String` | `SensorNivel(String, Tanque)` | Medir el nivel del tanque que tiene asignado, conservar el valor de su última lectura e indicar si esa lectura es válida. |
+| | `tanqueMonitoreado` | `Tanque` | `getId()`, `leer()`, `getUltimaLectura()` | |
+| | `ultimaLectura` | `double` | `lecturaValida()`, `mostrarLectura()` | |
+| `Main` | *(sin atributos)* | — | `main(String[])` | Crear los objetos, ejecutar la secuencia de operaciones de la simulación y presentar los resultados en consola. |
+
+### 5.1 Atributos y encapsulación
+
+Todos los atributos de `Tanque` y de `SensorNivel` se declaran `private`. La razón de fondo es la restricción establecida en la sección 1: si `nivelActual` fuera público, cualquier parte del programa podría asignarle un valor negativo o superior a la capacidad, y la regla `0 <= nivelActual <= capacidadMaxima` dejaría de estar garantizada. Al mantenerlo privado, el único camino para modificarlo es a través de `llenar()` y `vaciar()`, que sí validan los límites.
+
+El mismo criterio aplica a `estado`: no ofrecemos un método que permita asignarlo libremente desde fuera, porque entonces sería posible dejar un tanque marcado como `LLENANDO` sin que se hubiera llenado nada. El estado se actualiza únicamente como consecuencia de las operaciones `llenar()`, `vaciar()` y `detener()`.
+
+En cuanto a `capacidadMaxima`, corresponde a la construcción física del tanque y no cambia durante la operación, por lo que solo tiene método de consulta y nunca de modificación.
+
+### 5.2 Información que se recibe por el constructor
+
+El constructor de `Tanque` recibe el identificador, la capacidad máxima y el nivel inicial. Son los tres datos sin los cuales un tanque no puede existir de manera coherente: no tiene sentido un tanque sin nombre, sin capacidad definida o sin saber cuánto contiene al arrancar la simulación. El estado no se recibe como parámetro porque un tanque recién creado siempre inicia en `DETENIDO`; el propio constructor se encarga de asignarlo.
+
+El constructor de `SensorNivel` recibe su identificador y una referencia al `Tanque` que va a monitorear. Un sensor sin tanque asignado no podría cumplir ninguna de sus responsabilidades, así que la relación se establece desde el momento de la creación.
+
+### 5.3 Información consultable desde otras clases
+
+Desde `Main` se necesita poder consultar el identificador, la capacidad, el nivel, el porcentaje y el estado del tanque para mostrarlos en pantalla. Por eso todas esas consultas se ofrecen como métodos públicos que devuelven valores sin permitir modificarlos.
+
+Lo que no se expone en absoluto es la posibilidad de asignar directamente el nivel o el estado. Esa es precisamente la diferencia entre exponer *información* y exponer *control*: el tanque informa cómo está, pero solo él decide cómo cambia.
+
+### 5.4 Valores del estado de operación
+
+Como se decidió en la sección 2, el estado se maneja como texto. Para evitar errores de escritura al comparar o asignar cadenas, la clase `Tanque` definirá los tres valores como constantes públicas:
+
+```text
+public static final String DETENIDO  = "DETENIDO"
+public static final String LLENANDO  = "LLENANDO"
+public static final String VACIANDO  = "VACIANDO"
+```
+
+De este modo el valor se escribe una sola vez y el resto del programa se refiere a él por su nombre.
