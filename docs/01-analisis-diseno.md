@@ -1,9 +1,10 @@
-| Rol | Integrante                   | Usuario de GitHub | Fecha de inicio |
-    | :--- |:-----------------------------|:------------------| :--- |
-    | Estudiante A | Alejandro Spindola           | alespyba1         | Jueves 9 de septiembre de 2026 |
-    | Estudiante B | Ricardo René Reséndiz Nieves | rresendiz42-scar  | Jueves 9 de septiembre de 2026 |
+| Rol | Integrante | Usuario de GitHub | Fecha de inicio |
+| :--- | :--- | :--- | :--- |
+| Estudiante A | Alejandro Spindola | alespyba1 | Miércoles 9 de septiembre de 2026 |
+| Estudiante B | Ricardo René Reséndiz Nieves | rresendiz42-scar | Miércoles 9 de septiembre de 2026 |
 
 ---
+
 ## 1. Descripción del problema
 
 ### Qué sistema se pretende representar
@@ -16,16 +17,11 @@ El programa no controla equipo físico real. Es una simulación de consola cuyo 
 
 Para que la simulación tenga sentido, el sistema debe conservar:
 
-
-**Identificación de cada tanque**, ya que la instalación tiene varios y deben poder distinguirse entre sí (T-01, T-02, T-03).
-
-**Capacidad máxima**, expresada en litros. Es un dato fijo que corresponde a la construcción física del tanque y no debería cambiar durante la operación.
-
-**Nivel actual**, también en litros. Es el dato que varía continuamente conforme el tanque se llena o se vacía.
-
-**Estado de operación**, que indica qué está haciendo el tanque en este momento: `DETENIDO`, `LLENANDO` o `VACIANDO`.
-
-**Identificación del sensor** asociado y el valor de su última lectura, para poder rastrear de dónde proviene la medición.
+- **Identificación de cada tanque**, ya que la instalación tiene varios y deben poder distinguirse entre sí (T-01, T-02, T-03).
+- **Capacidad máxima**, expresada en litros. Es un dato fijo que corresponde a la construcción física del tanque y no debería cambiar durante la operación.
+- **Nivel actual**, también en litros. Es el dato que varía continuamente conforme el tanque se llena o se vacía.
+- **Estado de operación**, que indica qué está haciendo el tanque en este momento: `DETENIDO`, `LLENANDO` o `VACIANDO`.
+- **Identificación del sensor** asociado y el valor de su última lectura, para poder rastrear de dónde proviene la medición.
 
 Sobre estos datos asumimos lo siguiente: la capacidad y el nivel se manejan en litros como valores numéricos que admiten decimales, ya que una lectura de sensor rara vez arroja un valor entero exacto. El identificador del tanque y el del sensor son cadenas de texto, porque siguen un formato como T-01 o SN-01 que combina letras y números. El estado de operación, aunque se escribe como texto, solo puede tomar uno de los tres valores previstos.
 
@@ -51,6 +47,7 @@ De esta restricción se desprende una consecuencia importante para el diseño: e
 
 Además, el estado de operación debe corresponder a lo que realmente ocurrió: no tiene sentido que un tanque quede marcado como `LLENANDO` después de que se le solicitó detenerse.
 
+---
 
 ## 2. Identificación de objetos
 
@@ -93,14 +90,6 @@ Quedan entonces dos objetos del dominio, `Tanque` y `SensorNivel`, cuyas respons
 ---
 
 ## 4. Relaciones entre los objetos
-
-
-
-
-
-
-
-
 
 ---
 
@@ -151,7 +140,6 @@ public static final String VACIANDO  = "VACIANDO"
 
 De este modo el valor se escribe una sola vez y el resto del programa se refiere a él por su nombre.
 
-
 ---
 
 ## 6. Diagrama UML inicial
@@ -163,3 +151,73 @@ El diagrama muestra las tres clases con sus atributos privados (`-`), sus constr
 La flecha continua de `SensorNivel` hacia `Tanque` representa una asociación: cada sensor conserva una referencia al tanque que monitorea, con multiplicidad uno a uno. Es una relación dirigida, ya que el sensor conoce al tanque pero el tanque no necesita conocer a su sensor para cumplir sus propias responsabilidades.
 
 Las flechas punteadas desde `Main` indican dependencia: la clase principal crea instancias de ambas clases y utiliza sus métodos, pero no conserva ninguna relación estructural con ellas.
+
+---
+
+## 7. Justificación del diseño
+
+### 7.1 ¿Por qué propusimos esas clases?
+
+Nos preguntamos qué cosas del problema tienen datos propios y hacen algo con esos datos. El tanque cumple las dos: guarda su capacidad, su nivel y su estado, y además se llena, se vacía y se detiene. El sensor también: tiene su nombre, guarda lo último que midió y hace la lectura. Por eso quedaron esas dos.
+
+Pensamos en hacer más clases pero no encontramos para qué. El estado (`DETENIDO`, `LLENANDO`, `VACIANDO`) es nada más un texto que dice cómo está el tanque, no hace nada por sí solo. Y una clase que juntara a los tres tanques tampoco la vimos necesaria, porque la práctica no pide hacer nada con todos juntos; desde `Main` los podemos manejar uno por uno sin problema.
+
+### 7.2 ¿Cuál es la responsabilidad principal de cada clase?
+
+El **tanque** se encarga de guardar sus datos y de cuidar que su nivel no se salga de lo permitido. Es el único que puede cambiar su nivel, y por eso también es el único que puede asegurar que nunca quede negativo ni pase de su capacidad. Esa es la parte más importante de su trabajo.
+
+El **sensor** se encarga de medir. Le pregunta el nivel al tanque que tiene asignado, se guarda ese valor como su última lectura y dice si el valor tiene sentido o no.
+
+El **`Main`** se encarga de armar la simulación: crea los tanques y los sensores, les pide que hagan cosas y muestra los resultados en pantalla. No hace cuentas ni revisa límites, eso ya lo hacen los otros.
+
+### 7.3 ¿Por qué determinados atributos fueron definidos como privados?
+
+Porque si no, se rompe la regla del problema. Si `nivelActual` fuera público, cualquiera podría escribir desde `Main` algo como:
+
+```text
+tanque.nivelActual = -50;
+```
+
+y el tanque se quedaría con menos cero litros sin que nada lo impidiera. Al ponerlo privado, la única forma de cambiarlo es usando `llenar()` o `vaciar()`, y esos métodos sí revisan los límites antes de tocar el valor. O sea que el `private` no lo pusimos porque lo pida la práctica, sino porque es lo que hace que la regla se cumpla de verdad.
+
+Lo mismo pasa con los demás. La `capacidadMaxima` es privada y ni siquiera tiene método para cambiarla, porque el tamaño del tanque no cambia mientras está operando. El `estado` es privado porque debe decir lo que en realidad pasó; si se pudiera cambiar desde afuera, podríamos dejar un tanque que dice `LLENANDO` sin haberlo llenado. Y en el sensor, la `ultimaLectura` es privada porque tiene que venir de una medición de verdad, no de un número que le pongamos nosotros.
+
+En resumen, la idea que seguimos fue: los objetos sí pueden decir cómo están, pero solo ellos deciden cómo cambian.
+
+### 7.4 ¿Qué información decidimos proporcionar mediante los constructores?
+
+Pusimos nada más lo que el objeto necesita para poder existir bien.
+
+Al **tanque** le pasamos tres cosas: su nombre, su capacidad máxima y cuánto trae al empezar. Sin nombre no lo distinguiríamos de los otros, sin capacidad no podría revisar sus límites y sin nivel inicial no sabríamos de dónde arranca.
+
+A propósito **no** le pasamos el estado. Un tanque que apenas se crea siempre empieza detenido, así que el constructor solito le pone `DETENIDO`. Si lo pidiéramos como parámetro, alguien podría crear un tanque que ya nace llenándose, y eso no pasa en la realidad.
+
+Al **sensor** le pasamos dos: su nombre y el tanque que va a medir. Un sensor sin tanque no podría hacer absolutamente nada, entonces mejor que quede conectado desde que se crea. La lectura no se la pasamos porque esa tiene que salir de medir, no de que se la digamos.
+
+### 7.5 ¿Qué objetos se relacionan entre sí y por qué?
+
+El **sensor** se relaciona con el **tanque**: el sensor se guarda una referencia al tanque, pero el tanque no se guarda ninguna referencia al sensor.
+
+La relación tiene que existir porque el sensor no puede medir nada si no tiene a quién medirle. Pero la hicimos en un solo sentido a propósito. El tanque hace todo su trabajo sin necesitar saber si alguien lo está midiendo, igual que un tanque real se llena y se vacía tenga o no tenga sensor puesto. Si lo hubiéramos hecho en los dos sentidos, cada uno tendría que saber del otro sin ninguna ganancia, y sería más enredado.
+
+El `Main` usa a los dos, pero solo para crearlos y pedirles cosas, no se queda unido a ellos.
+
+### 7.6 ¿Qué decisiones tomamos para evitar duplicar responsabilidades?
+
+**Que el sensor no guarde el nivel del tanque.** Al principio pensamos ponerle al sensor un atributo `nivel` y actualizarlo a mano desde `Main` cada vez que el tanque cambiara. Pero eso deja el mismo dato guardado en dos lados, y si un día se nos olvida actualizarlo, el sensor diría 500 L mientras el tanque tiene 800 L, y el programa ni cuenta se daría. Así que mejor el nivel real vive solo en el tanque y el sensor se lo pregunta cada vez. Su `ultimaLectura` no es una copia del nivel, es el recuerdo de lo que midió la última vez, que no es lo mismo.
+
+**Que el porcentaje lo calcule el tanque.** El porcentaje sale del nivel y la capacidad, y los dos son datos del tanque. Si lo calculáramos en `Main`, tendríamos que sacar esos números para hacer la cuenta afuera, y no tiene caso.
+
+**Que `Main` no revise límites.** Toda la revisión se queda adentro del tanque. Si `Main` también revisara antes de llamar a `llenar()`, tendríamos que acordarnos de repetir esa revisión en cada lugar donde se llene un tanque, y con que se nos olvide una sola vez ya se rompió la regla.
+
+### 7.7 ¿Qué parte del diseño fue discutida entre ambos integrantes y qué decisión tomamos?
+
+Lo que más discutimos fue cómo conectar el sensor con el tanque.
+
+La primera idea fue que el sensor tuviera su propio nivel guardado y que desde `Main` lo fuéramos actualizando. Se veía más fácil de programar porque las dos clases quedaban separadas y ninguna dependía de la otra.
+
+Pero al revisarlo nos dimos cuenta de que esa separación era engañosa: en realidad nos obligaba a acordarnos de actualizar el sensor después de cada operación, y cualquier olvido daría lecturas falsas sin avisar. Aparte, tampoco se parece a como funciona de verdad, porque un sensor no espera a que alguien le diga el valor, lo saca del tanque que tiene enfrente.
+
+Al final decidimos que el sensor guardara una referencia al tanque y que al momento de leer le pregunte el nivel directamente. Así la lectura siempre coincide con lo que el tanque tiene en ese momento y no hay forma de que se desfasen.
+
+Lo otro que discutimos fue qué hacer cuando alguien quiere llenar de más. Vimos dos opciones: no hacer nada y rechazar la operación, o llenarlo hasta donde alcance. Escogimos la segunda porque se parece más a lo que pasa en un tanque real, donde lo que sobra simplemente se derrama. Eso ya lo dejamos anotado en la sección 1.
