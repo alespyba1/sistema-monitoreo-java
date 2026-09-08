@@ -150,3 +150,16 @@ public static final String VACIANDO  = "VACIANDO"
 ```
 
 De este modo el valor se escribe una sola vez y el resto del programa se refiere a él por su nombre.
+
+
+---
+
+## 6. Diagrama UML inicial
+
+![Diagrama UML inicial](uml-inicial.png)
+
+El diagrama muestra las tres clases con sus atributos privados (`-`), sus constructores y sus métodos públicos (`+`).
+
+La flecha continua de `SensorNivel` hacia `Tanque` representa una asociación: cada sensor conserva una referencia al tanque que monitorea, con multiplicidad uno a uno. Es una relación dirigida, ya que el sensor conoce al tanque pero el tanque no necesita conocer a su sensor para cumplir sus propias responsabilidades.
+
+Las flechas punteadas desde `Main` indican dependencia: la clase principal crea instancias de ambas clases y utiliza sus métodos, pero no conserva ninguna relación estructural con ellas.
