@@ -90,6 +90,25 @@ Quedan entonces dos objetos del dominio, `Tanque` y `SensorNivel`, cuyas respons
 
 ## 3. Estado y comportamiento
 
+| Objeto propuesto | Responsabilidad | Información que debe conservar | Comportamientos que debe realizar |
+| --- | --- | --- | --- |
+| Tanque | Representar un tanque de almacenamiento y controlar su nivel y estado de operación. | Identificador, capacidad máxima, nivel actual y estado de operación. | Permitir consultar su información, llenar el tanque, vaciarlo, detener su operación, consultar el nivel, obtener el porcentaje de llenado y conocer su estado. |
+| Sensor de nivel | Obtener la lectura del nivel de líquido presente en un tanque. | Tanque al que está asociado y la lectura obtenida. | Obtener una lectura del nivel actual del tanque y proporcionar dicha lectura al sistema. |
+
+El tanque es el objeto principal del sistema, ya que representa el elemento físico donde se almacena el líquido. Por esta razón, debe conservar la información relacionada con su capacidad, nivel actual, identificación y estado de operación. También debe ser responsable de las operaciones relacionadas con el llenado y vaciado del tanque.
+
+El sensor de nivel se considera un objeto independiente porque su función principal es obtener información sobre el nivel del líquido. De esta manera, se separa la responsabilidad de almacenar y controlar el nivel de la responsabilidad de realizar la lectura.
+
 ---
 
 ## 4. Relaciones entre los objetos
+
+El sensor de nivel necesita relacionarse con un tanque, debido a que su función depende de conocer el nivel actual del tanque que está monitoreando.
+
+La relación principal será entre el **Sensor de nivel** y el **Tanque**. El sensor estará asociado a un tanque y podrá obtener información sobre su nivel actual para realizar la lectura correspondiente.
+
+El tanque será responsable de conservar y modificar su propio nivel, mientras que el sensor será responsable únicamente de obtener la lectura. Por ejemplo, si un tanque tiene un nivel actual de 650 litros, el sensor podrá obtener ese valor como lectura.
+
+Es importante mantener separadas estas responsabilidades para evitar duplicar funciones. El tanque no debe encargarse del funcionamiento del sensor y el sensor no debe modificar directamente el nivel del tanque. Cada objeto debe encargarse de la responsabilidad que le corresponde dentro del sistema.
+
+---
