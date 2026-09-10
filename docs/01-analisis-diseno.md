@@ -1,7 +1,7 @@
-| Rol | Integrante | Usuario de GitHub | Fecha de inicio |
-| :--- | :--- | :--- | :--- |
-| Estudiante A | Alejandro Spindola | alespyba1 | Miércoles 9 de septiembre de 2026 |
-| Estudiante B | Ricardo René Reséndiz Nieves | rresendiz42-scar | Miércoles 9 de septiembre de 2026 |
+| Rol | Integrante | Usuario de GitHub | Fecha de inicio                |
+| :--- | :--- | :--- |:-------------------------------|
+| Estudiante A | Alejandro Spindola | alespyba1 | Jueves 7 de septiembre de 2026 |
+| Estudiante B | Ricardo René Reséndiz Nieves | rresendiz42-scar | Jueves 7 de septiembre de 2026 |
 
 ---
 
@@ -89,3 +89,98 @@ El tanque será responsable de conservar y modificar su propio nivel, mientras q
 El tanque no debe encargarse del funcionamiento del sensor y el sensor no debe modificar directamente el nivel del tanque. Cada objeto debe encargarse de se función unicamente
 
 ---
+
+## 5. Diseño de clases
+
+## 5. Diseño de clases
+
+## 5. Diseño de clases
+
+## 5. Diseño de clases
+
+| Clase | Atributos propuestos | Tipo de dato | Métodos propuestos | Responsabilidad |
+| --- | --- | --- | --- | --- |
+| Tanque | Número de tanque | String | Mostrar información | Junta todos los datos del tanque y los imprime en pantalla |
+| | Capacidad máxima | double | Llenar tanque | Le suma litros al contenido, sin pasarse de la capacidad |
+| | Nivel actual | double | Vaciar tanque | Le resta litros al contenido, sin bajar de cero |
+| | Estado de operación | String | Detener operación | Para el llenado o vaciado y pone el estado en detenido |
+| | | | Consultar nivel | Dice cuántos litros hay guardados en ese momento |
+| | | | Consultar porcentaje | Saca qué tan lleno está comparando el nivel con la capacidad |
+| | | | Consultar estado | Dice si está detenido, llenando o vaciando |
+| Sensor | ID del sensor | String | Consultar ID | Dice cómo se llama el sensor |
+| | Tanque que monitorea | Tanque | Hacer lectura | Va al tanque asignado, toma su nivel y se lo queda como medición |
+| | Última lectura | double | Consultar lectura | Dice cuánto marcó la última vez que midió |
+| | | | Validar lectura | Revisa si lo que midió cae dentro de lo que ese tanque puede tener |
+
+###  Qué atributos deben ser privados
+
+Todos los de **Tanque** y **Sensor** van a ser **private**. Si **nivel** fuera público, desde cualquier lado se le podría poner un número negativo o más grande que la capacidad y se rompería la regla.
+
+
+###  Qué recibe cada constructor
+
+**Tanque** recibe el id(Número de tanque), la capacidad máxima y el nivel inicial. Sin esos tres no puede funcionar bien. El estado no se le pasa porque siempre empieza en **DETENIDO** y eso lo pone el constructor solo.
+
+**Sensor** recibe su id y el tanque que va a medir. Un sensor sin tanque no serviría de nada.
+
+###  Qué se puede consultar desde otras clases
+
+Desde **Main** se puede ver el id, la capacidad, el nivel, el porcentaje y el estado del tanque, porque se necesitan para imprimirlos. Del sensor se puede ver su id y su última lectura.
+
+###  Qué no se puede modificar desde afuera
+
+No se puede asignar el nivel ni el estado directamente. Tampoco la capacidad máxima, porque el tanque no cambia de tamaño mientras opera. Y la lectura del sensor tampoco, porque tiene que salir de medir.
+
+
+## 6. Diagrama UML
+
+![Diagrama UML inicial](uml-inicial.png)
+
+---
+## 7. Justificación del diseño
+
+### ¿Por qué propusimos esas clases?
+
+Buscamos qué cosas del problema tienen sus propios datos y hacen algo con esos datos. El tanque los tiene: capacidad, nivel y estado, y además se llena, se vacía y se detiene. El sensor igual: tiene su id, guarda su lectura y mide. Por eso quedaron esas dos.
+
+### ¿Cuál es la responsabilidad principal de cada clase?
+
+**Tanque** guarda sus datos y cuida que el nivel no se salga de los límites. Como es el único que puede cambiar el nivel,.
+
+**Sensor** Le pregunta el nivel al tanque, y guarda ese valor como su última lectura y dice si es válido.
+
+### ¿Por qué determinados atributos fueron definidos como privados?
+
+Si el nivel fuera público, se le podría poner un número negativo o más grande que la capacidad y nada lo impediría. Estando privado, la única forma de cambiarlo es con **llenar()** o **vaciar()**, que sí revisan los límites antes, con los demás es igual.
+
+### ¿Qué información decidimos proporcionar mediante los constructores?
+
+Nada más lo que el objeto necesita para poder existir bien.
+
+Al tanque le pasamos su id, su capacidad máxima y cuánto trae al empezar. El estado no, porque siempre empieza detenido y eso lo pone el constructor solo.
+
+Al sensor le pasamos su id y el tanque que va a medir. La lectura no, porque esa sale de medir.
+
+### ¿Qué objetos se relacionan entre sí y por qué?
+
+El sensor con el tanque. El sensor guarda la referencia que tiene el tanque, pero el tanque no guarda ninguna del sensor.
+
+El sensor no puede medir si no sabe a quién, pero el tanque hace todo su trabajo sin importar si tiene sensor puesto o no.
+
+
+### ¿Qué decisiones tomamos para evitar duplicar responsabilidades?
+
+Que el sensor no guarde el nivel del tanque. Si lo guardara, el mismo dato estaría en dos lados y si se nos olvida actualizarlo.
+
+Que el porcentaje lo calcule el tanque, porque sale del nivel y la capacidad, y los dos son datos suyos.
+
+
+### ¿Qué parte del diseño fue discutida entre ambos integrantes y qué decisión tomamos?
+
+Lo que más discutimos fue cómo conectar el sensor con el tanque.
+
+La primera idea era que el sensor tuviera su propio nivel guardado y que desde **Main** lo fuéramos actualizando. Se veía más fácil, pero nos dimos cuenta de que nos obligaba a acordarnos de actualizarlo cada vez, y si se nos pasaba una vez el sensor daría lecturas falsas sin avisar.
+
+Al final quedamos en que el sensor guarde la referencia al tanque y que al leer le pregunte el nivel en ese momento. Así siempre coincide.
+
+Lo otro que discutimos fue qué hacer si alguien quiere llenar de más, Escogimos llenarlo

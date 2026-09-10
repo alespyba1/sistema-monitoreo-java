@@ -2,46 +2,39 @@
 skinparam classAttributeIconSize 0
 
 class Tanque {
-  + {static} DETENIDO : String
-  + {static} LLENANDO : String
-  + {static} VACIANDO : String
-  --
   - id : String
   - capacidadMaxima : double
   - nivelActual : double
   - estado : String
   --
-  + Tanque(id : String, capacidadMaxima : double, nivelInicial : double)
   + getId() : String
   + getCapacidadMaxima() : double
   + getNivelActual() : double
   + getEstado() : String
-  + llenar(litros : double) : void
-  + vaciar(litros : double) : void
+  + llenar(double) : void
+  + vaciar(double) : void
   + detener() : void
   + obtenerPorcentajeLlenado() : double
   + mostrarInformacion() : void
 }
 
-class SensorNivel {
+class Sensor {
   - id : String
   - tanqueMonitoreado : Tanque
   - ultimaLectura : double
   --
-  + SensorNivel(id : String, tanque : Tanque)
   + getId() : String
   + leer() : double
   + getUltimaLectura() : double
   + lecturaValida() : boolean
-  + mostrarLectura() : void
 }
 
 class Main {
   + main(args : String[]) : void
 }
 
-SensorNivel "1" --> "1" Tanque : monitorea
-Main ..> Tanque : crea y utiliza
-Main ..> SensorNivel : crea y utiliza
+Sensor  -->  Tanque
+Main --> Tanque
+Main --> Sensor
 
 @enduml
