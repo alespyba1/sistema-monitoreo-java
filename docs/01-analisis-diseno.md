@@ -92,12 +92,6 @@ El tanque no debe encargarse del funcionamiento del sensor y el sensor no debe m
 
 ## 5. Diseño de clases
 
-## 5. Diseño de clases
-
-## 5. Diseño de clases
-
-## 5. Diseño de clases
-
 | Clase | Atributos propuestos | Tipo de dato | Métodos propuestos | Responsabilidad |
 | --- | --- | --- | --- | --- |
 | Tanque | Número de tanque | String | Mostrar información | Junta todos los datos del tanque y los imprime en pantalla |
