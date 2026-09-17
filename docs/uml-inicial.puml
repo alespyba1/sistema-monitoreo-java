@@ -5,8 +5,9 @@ class Tanque {
   - id : String
   - capacidadMaxima : double
   - nivelActual : double
-  - estado : String
+  - estado : numerico
   --
+  + Tanque(String, double, double)
   + getId() : String
   + getCapacidadMaxima() : double
   + getNivelActual() : double
@@ -23,6 +24,7 @@ class Sensor {
   - tanqueMonitoreado : Tanque
   - ultimaLectura : double
   --
+  + Sensor(String, Tanque)
   + getId() : String
   + leer() : double
   + getUltimaLectura() : double
