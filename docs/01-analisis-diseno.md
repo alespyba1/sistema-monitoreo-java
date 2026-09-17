@@ -177,4 +177,5 @@ La primera idea era que el sensor tuviera su propio nivel guardado y que desde *
 
 Al final quedamos en que el sensor guarde la referencia al tanque y que al leer le pregunte el nivel en ese momento. Así siempre coincide.
 
+
 Lo otro que discutimos fue qué hacer si alguien quiere llenar de más, Escogimos llenarlo
