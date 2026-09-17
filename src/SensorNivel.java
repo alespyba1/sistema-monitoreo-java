@@ -1,10 +1,12 @@
 public class SensorNivel {
 
     private String identificador;
+    private Tanque tanque;
     private double valorMedido;
 
-    public SensorNivel(String identificador) {
+    public SensorNivel(String identificador, Tanque tanque) {
         this.identificador = identificador;
+        this.tanque = tanque;
         this.valorMedido = 0;
     }
 
