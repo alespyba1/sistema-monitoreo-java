@@ -64,5 +64,22 @@ public class Tanque {
             nivelActual = 0;
         }
     }
+
+    public void detener() {
+        estado = TankState.DETENIDO;
+    }
+
+    public double obtenerPorcentajeLlenado() {
+        return (nivelActual / capacidadMaxima) * 100;
+    }
+
+    public void mostrarInformacion() {
+        System.out.println("TANQUE " + id);
+        System.out.println("Capacidad: " + capacidadMaxima + " L");
+        System.out.println("Nivel actual: " + nivelActual + " L");
+        System.out.println("Porcentaje: " + obtenerPorcentajeLlenado() + " %");
+        System.out.println("Estado: " + estado);
+        System.out.println();
+    }
 }
 
