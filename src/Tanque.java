@@ -38,4 +38,31 @@ public class Tanque {
     public TankState getEstado() {
         return estado;
     }
+
+    public void llenar(double litros) {
+        if (litros <= 0) {
+            return;
+        }
+
+        estado = TankState.LLENANDO;
+        nivelActual = nivelActual + litros;
+
+        if (nivelActual > capacidadMaxima) {
+            nivelActual = capacidadMaxima;
+        }
+    }
+
+    public void vaciar(double litros) {
+        if (litros <= 0) {
+            return;
+        }
+
+        estado = TankState.VACIANDO;
+        nivelActual = nivelActual - litros;
+
+        if (nivelActual < 0) {
+            nivelActual = 0;
+        }
+    }
 }
+
