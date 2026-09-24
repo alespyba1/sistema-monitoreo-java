@@ -179,3 +179,22 @@ Al final quedamos en que el sensor guarde la referencia al tanque y que al leer 
 
 
 Lo otro que discutimos fue qué hacer si alguien quiere llenar de más, Escogimos llenarlo
+
+
+---
+
+## 8. Cambios realizados al diseño
+
+Al implementar el sistema cambiaron varias cosas respecto al UML inicial.
+
+**La clase Sensor se quedó como SensorNivel.** En el UML la habíamos puesto como `Sensor`, pero al escribir el código se dejó el nombre completo.
+
+**Cambiaron los nombres de los atributos y métodos del sensor.** `id` quedó como `identificador`, `tanqueMonitoreado` como `tanque` y `ultimaLectura` como `valorMedido`. Los métodos también: `leer()` es ahora `realizarLectura()`, `getUltimaLectura()` es `getValorMedido()` y `getId()` es `getIdentificador()`. Esto con la intención de ayudarnos a nosotros como equipo a poder entender mejor el funcionamiento del codigo, ya que llegaba a causar confusión que cada quién tuviera un nombre diferente en su progamación del sistema.
+
+**Se agregaron validaciones que no estaban previstas.** El constructor ahora acomoda el nivel inicial si viene negativo o más grande que la capacidad, y `obtenerPorcentajeLlenado()` revisa que la capacidad no sea cero antes de dividir. Esa última salió de la revisión del Pull Request.
+
+---
+
+## 9. Diagrama UML final
+
+![Diagrama UML final](uml-final.png)
