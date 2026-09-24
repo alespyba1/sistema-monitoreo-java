@@ -70,6 +70,9 @@ public class Tanque {
     }
 
     public double obtenerPorcentajeLlenado() {
+        if (capacidadMaxima <= 0) {
+            return 0;
+        }
         return (nivelActual / capacidadMaxima) * 100;
     }
 
