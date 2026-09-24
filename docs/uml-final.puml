@@ -1,0 +1,55 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+enum TankState {
+  LLENANDO
+  VACIANDO
+  DETENIDO
+}
+
+class Tanque {
+  - id : String
+  - capacidadMaxima : double
+  - nivelActual : double
+  - estado : TankState
+  --
+  + Tanque(String, double, double)
+  + getId() : String
+  + getCapacidadMaxima() : double
+  + getNivelActual() : double
+  + getEstado() : TankState
+  + llenar(double) : void
+  + vaciar(double) : void
+  + detener() : void
+  + obtenerPorcentajeLlenado() : double
+  + mostrarInformacion() : void
+}
+
+class SensorNivel {
+  - identificador : String
+  - tanque : Tanque
+  - valorMedido : double
+  --
+  + SensorNivel(String, Tanque)
+  + getIdentificador() : String
+  + realizarLectura() : double
+  + getValorMedido() : double
+  + lecturaValida() : boolean
+}
+
+class Main {
+  + main(String[]) : void
+}
+
+class PruebasSistema {
+  + main(String[]) : void
+}
+
+Tanque --> TankState
+SensorNivel --> Tanque
+Main --> Tanque
+Main --> SensorNivel
+PruebasSistema --> Tanque
+PruebasSistema --> SensorNivel
+
+@enduml
